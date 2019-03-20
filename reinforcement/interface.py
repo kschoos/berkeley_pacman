@@ -1,5 +1,7 @@
 from threading import Thread
 
+import numpy as np
+
 from pacman import runGames, readCommand
 import time
 
@@ -7,6 +9,9 @@ import time
 class ActionSpace:
     def __init__(self):
         self.n = 5
+
+    def sample(self):
+        return np.random.randint(0, self.n)
 
 class ObservationSpace:
     def __init__(self, observation_shape):
