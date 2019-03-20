@@ -24,6 +24,7 @@ from util import *
 import time, os
 import traceback
 import sys
+import numpy as np
 
 #######################
 # Parts worth reading #
@@ -98,6 +99,40 @@ class Configuration:
         x = hash(self.pos)
         y = hash(self.direction)
         return hash(x + 13 * y)
+
+    def asMultipleArrays(self):
+        width, height = self.layout.width, self.layout.height
+
+        food = np.zeros(shape=(width, height))
+        walls = np.zeros(shape=(width, height))
+        ghosts = np.zeros(shape=(width, height))
+        scaredGhosts = np.zeros(shape=(width, height))
+        pacman = np.zeros(shape=(width, height))
+        # scared_ghosts = np.zeros(shape=(width, height))
+        capsules = np.zeros(shape=(width, height))
+
+        for x in range(width):
+            for y in range(height):
+                food[x][y] = self.food[x][y] * 1
+                walls[x][y] = self.layout.walls[x][y] * 1
+
+        for x, y in self.capsules:
+            capsules[x][y] = 1
+
+        for agentState in self.agentStates:
+            if agentState == None: continue
+            if agentState.configuration == None: continue
+
+            x, y = [int(i) for i in nearestPoint( agentState.configuration.pos )]
+            if agentState.isPacman:
+                pacman[x][y] = 1
+            else:
+                if agentState.scaredTimer > 0:
+                    scaredGhosts[x][y] = 1
+                else:
+                    ghosts[x][y] = 1
+
+        return np.array([food, walls, ghosts, scaredGhosts, pacman, capsules])
 
     def __str__(self):
         return "(x,y)="+str(self.pos)+", "+str(self.direction)
