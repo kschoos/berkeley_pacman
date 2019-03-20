@@ -4,15 +4,16 @@ from pacman import runGames, readCommand
 import time
 
 
-class Space:
-    def __init__(self, observation_shape):
+class ActionSpace:
+    def __init__(self):
         self.n = 5
+
+class ObservationSpace:
+    def __init__(self, observation_shape):
         self.shape = observation_shape
 
 class Env:
-    def __init__(self, observation_shape, layout, numGames, numGhosts, numTraining):
-        self.action_space = Space(observation_shape)
-
+    def __init__(self, layout, numGames, numGhosts, numTraining):
         argv = []
         argv.append("-pInterfaceAgent")
         argv.append("-l{}".format(layout))
@@ -21,6 +22,10 @@ class Env:
         argv.append("-k{}".format(numGhosts))
 
         args = readCommand(argv)
+
+        observation_shape = (6, args['layout'].width, args['layout'].height)
+        self.action_space = ActionSpace()
+        self.observation_space = ObservationSpace(observation_shape)
 
         thread = Thread(target=runGames, kwargs=args)
         thread.start()
