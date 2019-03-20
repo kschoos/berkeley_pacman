@@ -100,39 +100,6 @@ class Configuration:
         y = hash(self.direction)
         return hash(x + 13 * y)
 
-    def asMultipleArrays(self):
-        width, height = self.layout.width, self.layout.height
-
-        food = np.zeros(shape=(width, height))
-        walls = np.zeros(shape=(width, height))
-        ghosts = np.zeros(shape=(width, height))
-        scaredGhosts = np.zeros(shape=(width, height))
-        pacman = np.zeros(shape=(width, height))
-        # scared_ghosts = np.zeros(shape=(width, height))
-        capsules = np.zeros(shape=(width, height))
-
-        for x in range(width):
-            for y in range(height):
-                food[x][y] = self.food[x][y] * 1
-                walls[x][y] = self.layout.walls[x][y] * 1
-
-        for x, y in self.capsules:
-            capsules[x][y] = 1
-
-        for agentState in self.agentStates:
-            if agentState == None: continue
-            if agentState.configuration == None: continue
-
-            x, y = [int(i) for i in nearestPoint( agentState.configuration.pos )]
-            if agentState.isPacman:
-                pacman[x][y] = 1
-            else:
-                if agentState.scaredTimer > 0:
-                    scaredGhosts[x][y] = 1
-                else:
-                    ghosts[x][y] = 1
-
-        return np.array([food, walls, ghosts, scaredGhosts, pacman, capsules])
 
     def __str__(self):
         return "(x,y)="+str(self.pos)+", "+str(self.direction)
@@ -466,6 +433,68 @@ class GameStateData:
                 print e
                 #hash(state)
         return int((hash(tuple(self.agentStates)) + 13*hash(self.food) + 113* hash(tuple(self.capsules)) + 7 * hash(self.score)) % 1048575 )
+
+    def asArray(self):
+        width, height = self.layout.width, self.layout.height
+        map = np.zeros(shape=(self.layout.width, self.layout.height))
+        if type(self.food) == type((1,2)):
+            self.food = reconstituteGrid(self.food)
+        for x in range(width):
+            for y in range(height):
+                if self.food[x][y]:
+                    map[x][y] = 175
+                elif self.layout.walls[x][y]:
+                    map[x][y] = 150
+
+        for agentState in self.agentStates:
+            if agentState == None: continue
+            if agentState.configuration == None: continue
+            x,y = [int( i ) for i in nearestPoint( agentState.configuration.pos )]
+            if agentState.isPacman:
+                map[x][y] = 125
+            elif agentState.scaredTimer > 0:
+                map[x][y] = 100
+            else:
+                map[x][y] = 75
+
+        for x, y in self.capsules:
+            map[x][y] = 25
+
+        return map
+
+    def asMultipleArrays(self):
+        width, height = self.layout.width, self.layout.height
+
+        food = np.zeros(shape=(width, height))
+        walls = np.zeros(shape=(width, height))
+        ghosts = np.zeros(shape=(width, height))
+        scaredGhosts = np.zeros(shape=(width, height))
+        pacman = np.zeros(shape=(width, height))
+        # scared_ghosts = np.zeros(shape=(width, height))
+        capsules = np.zeros(shape=(width, height))
+
+        for x in range(width):
+            for y in range(height):
+                food[x][y] = self.food[x][y] * 1
+                walls[x][y] = self.layout.walls[x][y] * 1
+
+        for x, y in self.capsules:
+            capsules[x][y] = 1
+
+        for agentState in self.agentStates:
+            if agentState == None: continue
+            if agentState.configuration == None: continue
+
+            x, y = [int(i) for i in nearestPoint( agentState.configuration.pos )]
+            if agentState.isPacman:
+                pacman[x][y] = 1
+            else:
+                if agentState.scaredTimer > 0:
+                    scaredGhosts[x][y] = 1
+                else:
+                    ghosts[x][y] = 1
+
+        return np.array([food, walls, ghosts, scaredGhosts, pacman, capsules])
 
     def __str__( self ):
         width, height = self.layout.width, self.layout.height

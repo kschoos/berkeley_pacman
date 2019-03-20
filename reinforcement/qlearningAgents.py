@@ -188,7 +188,7 @@ class ApproximateQAgent(PacmanQAgent):
 
 class InterfaceAgent(ReinforcementAgent):
     def process_state(self, state):
-        observation = state
+        observation = state.data.asArray()
         return observation
 
     def __init__(self, **args):
@@ -211,6 +211,8 @@ class InterfaceAgent(ReinforcementAgent):
         self.new_update_data = False
 
     def getAction(self, state):
+        self.last_observation = self.process_state(state)
+
         self.getAction_CV.acquire()
         while not self.new_action:
             self.getAction_CV.wait()

@@ -1,3 +1,4 @@
+import os
 from threading import Thread
 
 import numpy as np
@@ -20,24 +21,34 @@ class ObservationSpace:
 class Env:
     def __init__(self, layout, numGames, numGhosts, numTraining):
         argv = []
+        os.chdir("/home/skusku/Documents/Uni/Pacman/reinforcement")
         argv.append("-pInterfaceAgent")
         argv.append("-l{}".format(layout))
         argv.append("-n{}".format(numGames))
         argv.append("-x{}".format(numTraining))
         argv.append("-k{}".format(numGhosts))
+        argv.append("-q")
+
+        self.argv = argv
 
         args = readCommand(argv)
 
-        observation_shape = (6, args['layout'].width, args['layout'].height)
+        self.layout = args['layout']
+
+        self.agent = None
+
+        observation_shape = (self.layout.width, self.layout.height)
         self.action_space = ActionSpace()
         self.observation_space = ObservationSpace(observation_shape)
 
+    def reset(self):
+        args = readCommand(self.argv)
         thread = Thread(target=runGames, kwargs=args)
         thread.start()
-
         self.agent = args['pacman']
-        self.getAction_CV = self.agent.getAction_CV
-        self.update_CV = self.agent.update_CV
+
+        time.sleep(0.2)
+        return self.agent.last_observation
 
 
     def step(self, action):
@@ -58,7 +69,7 @@ class Env:
         next_state = self.agent.last_next_observation
         reward =  self.agent.last_reward
         done = abs(reward) > 400
-        info = None
+        info = dict()
 
         return next_state, reward, done, info
 

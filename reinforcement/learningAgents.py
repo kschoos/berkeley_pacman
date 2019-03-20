@@ -215,8 +215,8 @@ class ReinforcementAgent(ValueEstimationAgent):
 
     def registerInitialState(self, state):
         self.startEpisode()
-        if self.episodesSoFar == 0:
-            print 'Beginning %d episodes of Training' % (self.numTraining)
+        # if self.episodesSoFar == 0:
+            # print 'Beginning %d episodes of Training' % (self.numTraining)
 
     def final(self, state):
         """
@@ -253,6 +253,6 @@ class ReinforcementAgent(ValueEstimationAgent):
             self.lastWindowAccumRewards = 0.0
             self.episodeStartTime = time.time()
 
-        if self.episodesSoFar == self.numTraining:
-            msg = 'Training Done (turning off epsilon and alpha)'
-            print '%s\n%s' % (msg,'-' * len(msg))
+        # if self.episodesSoFar == self.numTraining:
+            # msg = 'Training Done (turning off epsilon and alpha)'
+            # print '%s\n%s' % (msg,'-' * len(msg))

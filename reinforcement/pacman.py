@@ -632,8 +632,6 @@ def runGames( layout, pacman, ghosts, display, numGames, record, numTraining = 0
     rules = ClassicGameRules(timeout)
     games = []
 
-    print("Layout: {}".format(layout))
-
     for i in range( numGames ):
         beQuiet = i < numTraining
         if beQuiet:
