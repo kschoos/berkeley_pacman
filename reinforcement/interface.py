@@ -34,9 +34,6 @@ class Env:
         self.getAction_CV = self.agent.getAction_CV
         self.update_CV = self.agent.update_CV
 
-        for i in range(200):
-            next_state, reward, done, _ = self.step(2)
-        self.agent.stop()
 
     def step(self, action):
         self.agent.getAction_CV.acquire()
@@ -61,4 +58,15 @@ class Env:
         return next_state, reward, done, info
 
 if __name__ == "__main__":
-    Env((1, 2), "smallClassic", 100, 1, 0)
+    # EXAMPLE CREATION OF ENVIRONMENT
+    env = Env(layout="smallClassic", numGames=100, numGhosts=1, numTraining=0)
+
+    # EXAMPLARY USE
+    # -----------------------------------------------------------
+    print("nb Actions: {}".format(env.action_space.n))
+    print("Observation space shape: {}".format(env.observation_space.shape))
+
+    for i in range(200):
+        next_state, reward, done, _ = env.step(2)
+    env.agent.stop()
+    # ----------------------------------------------------------
