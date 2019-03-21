@@ -237,9 +237,10 @@ class InterfaceAgent(ReinforcementAgent):
         self.update_CV.release()
 
     def stop(self):
+        self.getAction_CV.acquire()
+
         self.done = True
         self.new_action = True
 
-        self.getAction_CV.acquire()
         self.getAction_CV.notify()
         self.getAction_CV.release()
