@@ -42,7 +42,6 @@ class Env:
         self.observation_space = ObservationSpace(observation_shape)
 
     def reset(self):
-        print("reset")
         args = readCommand(self.argv)
         thread = Thread(target=runGames, kwargs=args)
         thread.start()
