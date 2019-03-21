@@ -48,14 +48,14 @@ class Env:
         thread.start()
         self.agent = args['pacman']
 
-        self.agent.first_observation_barrier.wait()
+        self.agent.first_observation_barrier.wait(2)
         return self.agent.last_observation
 
 
     def step(self, action):
         self.agent.action_to_take = action
-        self.agent.getAction_barrier.wait()
-        self.agent.update_barrier.wait()
+        self.agent.getAction_barrier.wait(2)
+        self.agent.update_barrier.wait(2)
         next_state = self.agent.last_next_observation
         reward =  self.agent.last_reward
         done = abs(reward) > 400
