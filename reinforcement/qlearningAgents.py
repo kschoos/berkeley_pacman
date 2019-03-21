@@ -195,10 +195,11 @@ class InterfaceAgent(ReinforcementAgent):
         ReinforcementAgent.__init__(self, **args)
 
         self.done = False
+        self.first_observation = False
 
-        self.firstObservation_CV = threading.Condition()
-        self.getAction_CV = threading.Condition()
-        self.update_CV = threading.Condition()
+        self.first_observation_barrier = threading.Barrier(2)
+        self.getAction_barrier = threading.Barrier(2)
+        self.update_barrier = threading.Barrier(2)
 
         self.action_to_take = None
 
@@ -207,53 +208,25 @@ class InterfaceAgent(ReinforcementAgent):
         self.last_next_observation = None
         self.last_action = None
 
-        self.new_action = False
-        self.new_update_data = False
-        self.first_observation = False
-
     def getAction(self, state):
-        self.firstObservation_CV.acquire()
-        self.last_observation = self.process_state(state)
-        self.first_observation = True
-        self.firstObservation_CV.notify()
-        self.firstObservation_CV.release()
+        if not self.first_observation:
+            self.first_observation = True
+            self.last_observation = self.process_state(state)
+            self.first_observation_barrier.wait()
 
-        print("beginAction")
-        self.last_observation = self.process_state(state)
-
-        self.getAction_CV.acquire()
-        while not self.new_action:
-            self.getAction_CV.wait()
-        self.new_action = False
-        self.getAction_CV.release()
+        self.getAction_barrier.wait()
 
         action = Actions._directionsAsList[self.action_to_take][0]
         if action not in self.getLegalActions(state):
             action = Directions.STOP
 
         self.doAction(state, action)
-        print("endAction")
         return action
 
     def update(self, state, action, nextState, reward):
-        print("beginUpdate")
-        self.update_CV.acquire()
-
         self.last_reward = reward
         self.last_next_observation = self.process_state(nextState)
-        self.new_update_data = True
-
-        self.update_CV.notify()
-        self.update_CV.release()
-        print("endUpdate")
+        self.update_barrier.wait()
 
     def stop(self):
-        print("beginStop")
-        self.getAction_CV.acquire()
-
         self.done = True
-        self.new_action = True
-
-        self.getAction_CV.notify()
-        self.getAction_CV.release()
-        print("endStop")

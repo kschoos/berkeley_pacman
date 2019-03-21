@@ -48,36 +48,18 @@ class Env:
         thread.start()
         self.agent = args['pacman']
 
-        self.agent.firstObservation_CV.acquire()
-        while not self.agent.first_observation:
-            self.agent.firstObservation_CV.wait()
-        self.agent.firstObservation_CV.release()
-
+        self.agent.first_observation_barrier.wait()
         return self.agent.last_observation
 
 
     def step(self, action):
-        print("startStep")
-        self.agent.getAction_CV.acquire()
         self.agent.action_to_take = action
-        self.agent.new_action = True
-        self.agent.getAction_CV.notify()
-        self.agent.getAction_CV.release()
-
-
-        print("middleStep")
-        self.agent.update_CV.acquire()
-        while not self.agent.new_update_data:
-            self.agent.update_CV.wait()
-        self.agent.new_update_data = False
-        self.agent.update_CV.release()
-
-
+        self.agent.getAction_barrier.wait()
+        self.agent.update_barrier.wait()
         next_state = self.agent.last_next_observation
         reward =  self.agent.last_reward
         done = abs(reward) > 400
         info = dict()
-        print("endStep")
 
         return next_state, reward, done, info
 
