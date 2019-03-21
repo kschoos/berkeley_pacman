@@ -196,7 +196,7 @@ class InterfaceAgent(ReinforcementAgent):
 
         self.done = False
 
-        self.newObservation_CV = threading.Condition()
+        self.firstObservation_CV = threading.Condition()
         self.getAction_CV = threading.Condition()
         self.update_CV = threading.Condition()
 
@@ -209,8 +209,15 @@ class InterfaceAgent(ReinforcementAgent):
 
         self.new_action = False
         self.new_update_data = False
+        self.first_observation = False
 
     def getAction(self, state):
+        self.firstObservation_CV.acquire()
+        self.last_observation = self.process_state(state)
+        self.first_observation = True
+        self.firstObservation_CV.notify()
+        self.firstObservation_CV.release()
+
         print("beginAction")
         self.last_observation = self.process_state(state)
 
