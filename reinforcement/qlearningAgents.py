@@ -214,7 +214,9 @@ class InterfaceAgent(ReinforcementAgent):
             self.last_observation = self.process_state(state)
             self.first_observation_barrier.wait(2)
 
+        print("before getAction barrier")
         self.getAction_barrier.wait(2)
+        print("after getAction barrier")
 
         action = Actions._directionsAsList[self.action_to_take][0]
         if action not in self.getLegalActions(state):
@@ -226,7 +228,9 @@ class InterfaceAgent(ReinforcementAgent):
     def update(self, state, action, nextState, reward):
         self.last_reward = reward
         self.last_next_observation = self.process_state(nextState)
+        print("before update barrier")
         self.update_barrier.wait(2)
+        print("after update barrier")
 
     def stop(self):
         self.done = True
