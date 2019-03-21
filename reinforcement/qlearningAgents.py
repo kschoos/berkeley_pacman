@@ -212,9 +212,9 @@ class InterfaceAgent(ReinforcementAgent):
         if not self.first_observation:
             self.first_observation = True
             self.last_observation = self.process_state(state)
-            self.first_observation_barrier.wait()
+            self.first_observation_barrier.wait(2)
 
-        self.getAction_barrier.wait()
+        self.getAction_barrier.wait(2)
 
         action = Actions._directionsAsList[self.action_to_take][0]
         if action not in self.getLegalActions(state):
@@ -226,7 +226,7 @@ class InterfaceAgent(ReinforcementAgent):
     def update(self, state, action, nextState, reward):
         self.last_reward = reward
         self.last_next_observation = self.process_state(nextState)
-        self.update_barrier.wait()
+        self.update_barrier.wait(2)
 
     def stop(self):
         self.done = True
