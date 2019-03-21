@@ -43,8 +43,11 @@ class Env:
 
     def reset(self):
         args = readCommand(self.argv)
+        print("Fine")
         thread = Thread(target=runGames, kwargs=args)
         thread.start()
+        print("Still Fine")
+
         self.agent = args['pacman']
 
         self.agent.first_observation_barrier.wait(2)
