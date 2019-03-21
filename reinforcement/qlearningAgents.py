@@ -211,6 +211,7 @@ class InterfaceAgent(ReinforcementAgent):
         self.new_update_data = False
 
     def getAction(self, state):
+        print("beginAction")
         self.last_observation = self.process_state(state)
 
         self.getAction_CV.acquire()
@@ -224,9 +225,11 @@ class InterfaceAgent(ReinforcementAgent):
             action = Directions.STOP
 
         self.doAction(state, action)
+        print("endAction")
         return action
 
     def update(self, state, action, nextState, reward):
+        print("beginUpdate")
         self.update_CV.acquire()
 
         self.last_reward = reward
@@ -235,8 +238,10 @@ class InterfaceAgent(ReinforcementAgent):
 
         self.update_CV.notify()
         self.update_CV.release()
+        print("endUpdate")
 
     def stop(self):
+        print("beginStop")
         self.getAction_CV.acquire()
 
         self.done = True
@@ -244,3 +249,4 @@ class InterfaceAgent(ReinforcementAgent):
 
         self.getAction_CV.notify()
         self.getAction_CV.release()
+        print("endStop")
