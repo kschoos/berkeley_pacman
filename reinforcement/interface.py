@@ -52,6 +52,7 @@ class Env:
 
 
     def step(self, action):
+        print("startStep")
         self.agent.getAction_CV.acquire()
         self.agent.action_to_take = action
         self.agent.new_action = True
@@ -59,6 +60,7 @@ class Env:
         self.agent.getAction_CV.release()
 
 
+        print("middleStep")
         self.agent.update_CV.acquire()
         while not self.agent.new_update_data:
             self.agent.update_CV.wait()
@@ -70,6 +72,7 @@ class Env:
         reward =  self.agent.last_reward
         done = abs(reward) > 400
         info = dict()
+        print("endStep")
 
         return next_state, reward, done, info
 
