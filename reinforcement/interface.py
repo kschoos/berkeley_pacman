@@ -51,10 +51,12 @@ class Env:
         self.agent = args['pacman']
 
         self.agent.first_observation_barrier.wait(2)
+        print("Even still fine")
         return self.agent.last_observation
 
 
     def step(self, action):
+        print("Still really fine")
         self.agent.action_to_take = action
         self.agent.getAction_barrier.wait(2)
         self.agent.update_barrier.wait(2)
