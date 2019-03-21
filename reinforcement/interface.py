@@ -54,13 +54,11 @@ class Env:
 
     def step(self, action):
         self.agent.action_to_take = action
-        self.agent.getAction_barrier.wait(2)
-        self.agent.update_barrier.wait(2)
+        self.agent.getAction_barrier.wait(30)
+        self.agent.update_barrier.wait(30)
         next_state = self.agent.last_next_observation
         reward =  self.agent.last_reward
-        done = abs(reward) > 300
-        if done and abs(reward) < 400:
-            print(" Schlawiner: {}".format(reward))
+        done = abs(reward) > 200
         info = dict()
 
         return next_state, reward, done, info
