@@ -42,12 +42,19 @@ class Env:
         self.observation_space = ObservationSpace(observation_shape)
 
     def reset(self):
+        if self.agent:
+            self.agent.stop()
+
+        time.sleep(0.1)
+
+        self.agent = None
+        print("reset")
         args = readCommand(self.argv)
         thread = Thread(target=runGames, kwargs=args)
         thread.start()
         self.agent = args['pacman']
 
-        time.sleep(0.2)
+        time.sleep(0.1)
         return self.agent.last_observation
 
 
