@@ -59,8 +59,8 @@ class Env:
         next_state = self.agent.last_next_observation
         reward =  self.agent.last_reward
         done = abs(reward) > 300
-        if done:
-            print(reward)
+        if done and abs(reward) < 400:
+            print(" Schlawiner: {}".format(reward))
         info = dict()
 
         return next_state, reward, done, info
