@@ -39,6 +39,8 @@ code to run a game.  This file is divided into three sections:
 To play your first game, type 'python pacman.py' from the command line.
 The keys are 'a', 's', 'd', and 'w' to move (or arrow keys).  Have fun!
 """
+import socket
+
 from game import GameStateData
 from game import Game
 from game import Directions
@@ -523,6 +525,7 @@ def readCommand( argv ):
                       help='Turns on exception handling and timeouts during games', default=False)
     parser.add_option('--timeout', dest='timeout', type='int',
                       help=default('Maximum length of time an agent can spend computing in a single game'), default=30)
+    parser.add_option('--udp', dest='udp', action='store_true', default=False)
 
     options, otherjunk = parser.parse_args(argv)
     if len(otherjunk) != 0:
@@ -536,10 +539,12 @@ def readCommand( argv ):
     args['layout'] = layout.getLayout( options.layout )
     if args['layout'] == None: raise Exception("The layout " + options.layout + " cannot be found")
 
+
     # Choose a Pacman agent
     noKeyboard = options.gameToReplay == None and (options.textGraphics or options.quietGraphics)
     pacmanType = loadAgent(options.pacman, noKeyboard)
     agentOpts = parseAgentArgs(options.agentArgs)
+
     if options.numTraining > 0:
         args['numTraining'] = options.numTraining
         if 'numTraining' not in agentOpts: agentOpts['numTraining'] = options.numTraining
@@ -682,7 +687,6 @@ if __name__ == '__main__':
 
     > python pacman.py --help
     """
-    print(sys.argv[1:])
     args = readCommand( sys.argv[1:] ) # Get game components based on input
     runGames( **args )
 

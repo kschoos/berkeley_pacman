@@ -10,7 +10,7 @@
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
 # Student side autograding was added by Brad Miller, Nick Hay, and
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
-
+import socket
 
 from game import *
 from learningAgents import ReinforcementAgent
@@ -193,15 +193,18 @@ class InterfaceAgent(ReinforcementAgent):
 
     def __init__(self, **args):
         ReinforcementAgent.__init__(self, **args)
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.server_addr = ("localhost", 10000)
+        # assert(data == "start")
 
         self.done = False
         self.first_observation = False
 
-        self.first_observation_barrier = threading.Barrier(2)
-        self.getAction_barrier = threading.Barrier(2)
-        self.update_barrier = threading.Barrier(2)
+        # self.first_observation_barrier = threading.Barrier(2)
+        # self.getAction_barrier = threading.Barrier(2)
+        # self.update_barrier = threading.Barrier(2)
 
-        self.action_to_take = None
+        self.action_to_take = 1
 
         self.last_reward = None
         self.last_observation = None
@@ -211,10 +214,12 @@ class InterfaceAgent(ReinforcementAgent):
     def getAction(self, state):
         if not self.first_observation:
             self.first_observation = True
-            self.last_observation = self.process_state(state)
-            self.first_observation_barrier.wait(30)
+            state_str = str(state)
+            self.socket.sendto(bytes(state_str), self.server_addr)
 
-        self.getAction_barrier.wait(30)
+        self.action_to_take, self.server_addr = self.socket.recvfrom(1)
+        self.action_to_take = int(self.action_to_take.decode("ASCII"))
+        # # self.getAction_barrier.wait(30)
 
         action = Actions._directionsAsList[self.action_to_take][0]
         if action not in self.getLegalActions(state):
@@ -224,9 +229,11 @@ class InterfaceAgent(ReinforcementAgent):
         return action
 
     def update(self, state, action, nextState, reward):
-        self.last_reward = reward
-        self.last_next_observation = self.process_state(nextState)
-        self.update_barrier.wait(30)
+        done_str = str("1" if self.done else "0")
+        reward_str = str(int(reward)).zfill(4)
+        state_str = str(nextState)
+
+        sent = self.socket.sendto(bytes(done_str + reward_str + state_str), self.server_addr)
 
     def stop(self):
         self.done = True
