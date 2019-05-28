@@ -23,7 +23,7 @@ class ObservationSpace:
 
 class Env(gym.Env):
     def __init__(self, layout, numGames, numGhosts, numTraining, layoutWidth, layoutHeight):
-        self.pacman_cwd = "/home/skusku/Documents/Uni/Pacman/reinforcement/"
+        self.pacman_cwd = "/home/skusku/Documents/Repos/berkeley_pacman/reinforcement/"
 
         argv = []
         argv.append("python2")
@@ -37,6 +37,7 @@ class Env(gym.Env):
 
         self.layoutWidth = layoutWidth
         self.layoutHeight = layoutHeight
+        self.process = None
 
         self.argv = argv
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -56,6 +57,11 @@ class Env(gym.Env):
 
     def close(self):
         self.socket.close()
+        try:
+            self.process.kill()
+        except:
+            pass
+        os.system("killall python2")
 
     def process_observation_string(self, str):
         width, height = self.layoutWidth, self.layoutHeight
@@ -81,6 +87,7 @@ class Env(gym.Env):
         return map
 
     def reset(self):
+        if self.process: self.process.kill()
         self.process = subprocess.Popen(self.argv, cwd=self.pacman_cwd, stderr=subprocess.DEVNULL)
         data, self.client_addr = self.socket.recvfrom(self.observation_length)
         data = data.decode("ASCII")
@@ -101,7 +108,11 @@ class Env(gym.Env):
         reward = int(reward_str)
         done = abs(reward) > 200
         info = dict()
-
+        if done:
+            try:
+                self.process.kill()
+            except:
+                pass
         return next_state, reward, done, info
 
 # class ThreadEnv(gym.Env):
