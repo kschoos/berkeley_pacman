@@ -139,6 +139,9 @@ class Env(gym.Env):
         done = abs(reward) > 200
 
         info = dict()
+
+        self.error_log.flush()
+
         return next_state, reward, done, info
 
 # class ThreadEnv(gym.Env):
