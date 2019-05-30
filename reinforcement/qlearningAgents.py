@@ -193,8 +193,9 @@ class InterfaceAgent(ReinforcementAgent):
 
     def __init__(self, **args):
         ReinforcementAgent.__init__(self, **args)
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_addr = ("localhost", 10000)
+        self.socket.connect(self.server_addr)
         # assert(data == "start")
 
         self.done = False
@@ -215,9 +216,9 @@ class InterfaceAgent(ReinforcementAgent):
         if not self.first_observation:
             self.first_observation = True
             state_str = str(state)
-            self.socket.sendto(bytes(state_str), self.server_addr)
+            self.socket.send(bytes(state_str))
 
-        self.action_to_take, self.server_addr = self.socket.recvfrom(1)
+        self.action_to_take = self.socket.recv(1)
         self.action_to_take = int(self.action_to_take.decode("ASCII"))
         # # self.getAction_barrier.wait(30)
 
@@ -232,8 +233,10 @@ class InterfaceAgent(ReinforcementAgent):
         done_str = str("1" if self.done else "0")
         reward_str = str(int(reward)).zfill(4)
         state_str = str(nextState)
+        self.socket.send(bytes(done_str + reward_str + state_str))
 
-        sent = self.socket.sendto(bytes(done_str + reward_str + state_str), self.server_addr)
-
-    def stop(self):
-        self.done = True
+    def final(self, state):
+        "Called at the end of each game."
+        # call the super-class final method
+        # PacmanQAgent.final(self, state)
+        self.socket.close()

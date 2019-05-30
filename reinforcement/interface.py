@@ -40,10 +40,13 @@ class Env(gym.Env):
         self.process = None
 
         self.argv = argv
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.server_addr = ('localhost', 10000)
         self.client_addr = None
         self.socket.bind(self.server_addr)
+        self.socket.listen(1)
+        self.connection = None
 
         observation_shape = (self.layoutWidth, self.layoutHeight)
 
@@ -56,12 +59,14 @@ class Env(gym.Env):
         self.observation_space = gym.spaces.Box(32, 111, [self.layoutWidth, self.layoutHeight, 1])
 
     def close(self):
-        self.socket.close()
         try:
+            self.socket.shutdown(socket.SHUT_RDWR)
+            self.connection.close()
+            self.socket.close()
             self.process.kill()
-        except:
+        except Exception as e:
+            print(e)
             pass
-        os.system("killall python2")
 
     def process_observation_string(self, str):
         width, height = self.layoutWidth, self.layoutHeight
@@ -87,17 +92,24 @@ class Env(gym.Env):
         return map
 
     def reset(self):
-        if self.process: self.process.kill()
-        self.process = subprocess.Popen(self.argv, cwd=self.pacman_cwd, stderr=subprocess.DEVNULL)
-        data, self.client_addr = self.socket.recvfrom(self.observation_length)
+        if self.process:
+            self.process.kill()
+        if self.connection:
+            self.connection.close()
+
+        self.process = subprocess.Popen(self.argv, cwd=self.pacman_cwd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+        self.connection, self.client_addr = self.socket.accept()
+        data = self.connection.recv(self.observation_length)
+
         data = data.decode("ASCII")
 
         return self.process_observation_string(data)
 
 
     def step(self, action):
-        sent = self.socket.sendto(bytes("{}".format(action), "ASCII"), self.client_addr)
-        data, self.client_addr = self.socket.recvfrom(self.packet_length)
+        self.connection.send(bytes("{}".format(action), "ASCII"))
+        data = self.connection.recv(self.packet_length)
         data = data.decode("ASCII")
 
         done_str = data[:self.done_length]
@@ -107,12 +119,8 @@ class Env(gym.Env):
         next_state = self.process_observation_string(state_str)
         reward = int(reward_str)
         done = abs(reward) > 200
+
         info = dict()
-        if done:
-            try:
-                self.process.kill()
-            except:
-                pass
         return next_state, reward, done, info
 
 # class ThreadEnv(gym.Env):
@@ -217,13 +225,23 @@ if __name__ == "__main__":
     lastMove = 4
     keys = []
 
+    print("Starting env")
     env = Env(layout="smallClassic", numGames=1, numGhosts=0, numTraining=0, layoutWidth=20, layoutHeight=7)
-    observation = env.reset()
 
-    done = False
-    while(not done):
-        try:
-            action = int(sys.stdin.read(1))
-            _, _, done, _ = env.step(action)
-        except:
-            pass
+    actions = [1, 2, 1, 1, 2, 4, 3, 2, 0, 0, 2]
+    for i in range(10):
+        observation = env.reset()
+        for action in actions:
+            try:
+                # action = int(sys.stdin.read(1))
+                _, _, done, _ = env.step(action)
+            except Exception as e:
+                print(e)
+                pass
+
+    env.close()
+
+    # done = False
+    # while(not done):
+
+    print("Done!")
