@@ -75,12 +75,9 @@ class Env(gym.Env):
         agentChrs = ['v', '^', '>', '<']
         ghostChrs = ['M', 'W', '3', 'E']
 
-        print("String: " + str)
-
         for y in range(height):
             for x in range(width):
                 chr = str[(width + 1) * y + x]
-                # sys.stdout.write(chr)
 
                 if chr in agentChrs:
                     chr = 'P'
@@ -91,8 +88,6 @@ class Env(gym.Env):
                 map[x][y] = ord(chr)
 
         map = map.reshape((self.layoutWidth, self.layoutHeight, 1))
-
-        sys.stdout.flush()
 
         return map
 
