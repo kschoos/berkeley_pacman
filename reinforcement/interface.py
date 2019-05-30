@@ -127,7 +127,7 @@ class Env(gym.Env):
         reward_str = data[self.done_length:self.done_length + self.reward_length]
         state_str = data[self.done_length + self.reward_length:]
 
-        self.error_log.write("Reveived: --------------------------------------\n")
+        self.error_log.write("Received: --------------------------------------\n")
         self.error_log.write(data)
         self.error_log.write("------------------------------------------------\n")
 
