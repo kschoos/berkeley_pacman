@@ -60,7 +60,7 @@ class Env(gym.Env):
 
     def close(self):
         try:
-            self.socket.shutdown(socket.SHUT_RDWR)
+            # self.socket.shutdown(socket.SHUT_RDWR)
             self.connection.close()
             self.socket.close()
             self.process.kill()
@@ -95,10 +95,11 @@ class Env(gym.Env):
         self.error_log.write("Resetting environment\n")
         if self.process:
             self.process.kill()
-        if self.connection:
-            self.connection.close()
+        # if self.connection:
+        #    self.connection.close()
 
         self.process = subprocess.Popen(self.argv, cwd=self.pacman_cwd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        self.error_log.write("Started subprocess\n")
 
         self.connection, self.client_addr = self.socket.accept()
         self.error_log.write("Accepted connection\n")
