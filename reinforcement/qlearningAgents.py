@@ -235,8 +235,3 @@ class InterfaceAgent(ReinforcementAgent):
         state_str = str(nextState)
         self.socket.send(bytes(done_str + reward_str + state_str))
 
-    def final(self, state):
-        "Called at the end of each game."
-        # call the super-class final method
-        # PacmanQAgent.final(self, state)
-        self.socket.close()
