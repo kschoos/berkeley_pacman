@@ -7,8 +7,7 @@ from threading import Thread
 import gym
 import numpy as np
 
-import time
-
+path = "/home/skusku/Documents/Uni/Pacman/"
 
 class ActionSpace:
     def __init__(self):
@@ -23,7 +22,8 @@ class ObservationSpace:
 
 class Env(gym.Env):
     def __init__(self, layout, numGames, numGhosts, numTraining, layoutWidth, layoutHeight):
-        self.pacman_cwd = "/home/skusku/Documents/Repos/berkeley_pacman/reinforcement/"
+        self.pacman_cwd = "/home/skusku/Documents/Uni/Pacman/reinforcement/"
+        self.error_log = open("{}/error.log".format(path), "w+")
 
         argv = []
         argv.append("python2")
@@ -92,6 +92,7 @@ class Env(gym.Env):
         return map
 
     def reset(self):
+        self.error_log.write("Resetting environment\n")
         if self.process:
             self.process.kill()
         if self.connection:
@@ -100,15 +101,22 @@ class Env(gym.Env):
         self.process = subprocess.Popen(self.argv, cwd=self.pacman_cwd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
         self.connection, self.client_addr = self.socket.accept()
-        data = self.connection.recv(self.observation_length)
+        self.error_log.write("Accepted connection\n")
 
+        data = self.connection.recv(self.observation_length)
         data = data.decode("ASCII")
+
+        self.error_log.write("Got first observation: ---------------------------------\n")
+        self.error_log.write(data)
+        self.error_log.write("-------------------------------------------------------\n")
 
         return self.process_observation_string(data)
 
 
     def step(self, action):
         self.connection.send(bytes("{}".format(action), "ASCII"))
+
+        self.error_log.write("Sending: {}\n".format(action))
         data = self.connection.recv(self.packet_length)
         data = data.decode("ASCII")
 
@@ -116,7 +124,16 @@ class Env(gym.Env):
         reward_str = data[self.done_length:self.done_length + self.reward_length]
         state_str = data[self.done_length + self.reward_length:]
 
-        next_state = self.process_observation_string(state_str)
+        self.error_log.write("Reveived: --------------------------------------\n")
+        self.error_log.write(data)
+        self.error_log.write("------------------------------------------------\n")
+
+        try:
+            next_state = self.process_observation_string(state_str)
+        except Exception as e:
+            self.error_log.close()
+            raise e
+
         reward = int(reward_str)
         done = abs(reward) > 200
 
