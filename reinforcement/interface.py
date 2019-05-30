@@ -7,7 +7,7 @@ from threading import Thread
 import gym
 import numpy as np
 
-path = "/home/skusku/Documents/Uni/Pacman"
+path = "/home/skusku/Documents/Repos/berkeley_pacman"
 
 class ActionSpace:
     def __init__(self):
