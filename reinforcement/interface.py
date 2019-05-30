@@ -111,6 +111,8 @@ class Env(gym.Env):
         self.error_log.write(data)
         self.error_log.write("-------------------------------------------------------\n")
 
+        self.error_log.flush()
+
         return self.process_observation_string(data)
 
 
@@ -139,6 +141,7 @@ class Env(gym.Env):
         done = abs(reward) > 200
 
         info = dict()
+
         return next_state, reward, done, info
 
 # class ThreadEnv(gym.Env):
