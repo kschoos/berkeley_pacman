@@ -7,7 +7,7 @@ from threading import Thread
 import gym
 import numpy as np
 
-path = "/home/skusku/Documents/Uni/Pacman/"
+path = "/home/skusku/Documents/Uni/Pacman"
 
 class ActionSpace:
     def __init__(self):
@@ -22,7 +22,7 @@ class ObservationSpace:
 
 class Env(gym.Env):
     def __init__(self, layout, numGames, numGhosts, numTraining, layoutWidth, layoutHeight):
-        self.pacman_cwd = "/home/skusku/Documents/Uni/Pacman/reinforcement/"
+        self.pacman_cwd = "{}/reinforcement/".format(path)
         self.error_log = open("{}/error.log".format(path), "w+")
 
         argv = []
@@ -75,9 +75,12 @@ class Env(gym.Env):
         agentChrs = ['v', '^', '>', '<']
         ghostChrs = ['M', 'W', '3', 'E']
 
+        print("String: " + str)
+
         for y in range(height):
             for x in range(width):
                 chr = str[(width + 1) * y + x]
+                # sys.stdout.write(chr)
 
                 if chr in agentChrs:
                     chr = 'P'
@@ -88,6 +91,8 @@ class Env(gym.Env):
                 map[x][y] = ord(chr)
 
         map = map.reshape((self.layoutWidth, self.layoutHeight, 1))
+
+        sys.stdout.flush()
 
         return map
 
