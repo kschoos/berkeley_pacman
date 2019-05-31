@@ -58,7 +58,8 @@ memory_size = 1000000
 num_runs = 3
 num_ghosts = 2
 
-os.makedirs(path)
+if not os.path.exists(path):
+    os.makedirs(path)
 
 setup = """ TEST {}:
 DQN:
@@ -95,13 +96,16 @@ parser.add_argument('--env-name', type=str, default='BerkeleyPacman-training-v0'
 parser.add_argument('--weights', type=str, default=None)
 args = parser.parse_args()
 
+training_env_name = "BerkeleyPacman-training-v0"
+testing_env_name = "BerkeleyPacman-testing-v0"
+args.env_name = training_env_name if args.mode == "train" else testing_env_name
+
 for i in range(num_runs):
   run_path = "{}/RUN{}".format(path, i)
-  os.makedirs(run_path)
-  # Get the environment and extract the number of actions.
+  if not os.path.exists(run_path):
+    os.makedirs(run_path)
   env = gym.make(args.env_name)
   np.random.seed(123)
-  # env.seed(123)
   nb_actions = env.action_space.n
   
   # Next, we build our model. We use the same model that was described by Mnih et al. (2015).
@@ -155,7 +159,7 @@ for i in range(num_runs):
       # After training is done, we save the final weights one more time.
       dqn.save_weights(weights_filename, overwrite=True)
   elif args.mode == 'test':
-      weights_filename = '{}/dqn_{}_weights.h5f'.format(run_path, args.env_name)
+      weights_filename = '{}/dqn_{}_weights.h5f'.format(run_path, training_env_name)
       if args.weights:
           weights_filename = args.weights
       dqn.load_weights(weights_filename)

@@ -58,6 +58,9 @@ class Env(gym.Env):
         self.action_space = gym.spaces.Discrete(5)
         self.observation_space = gym.spaces.Box(32, 111, [self.layoutWidth, self.layoutHeight, 1])
 
+    def render(self, state):
+        pass
+
     def close(self):
         try:
             # self.socket.shutdown(socket.SHUT_RDWR)
