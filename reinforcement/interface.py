@@ -160,7 +160,7 @@ class Env(gym.Env):
             raise e
 
         reward = int(reward_str)
-        done = abs(reward) > 200
+        done = abs(reward) > 450
 
         info = dict()
 
