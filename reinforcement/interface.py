@@ -21,9 +21,27 @@ class ObservationSpace:
         self.shape = observation_shape
 
 class Env(gym.Env):
-    def __init__(self, layout, numGames, numGhosts, numTraining, layoutWidth, layoutHeight):
+    def initlogging(self):
+        if(self.logging):
+            self.error_log = open("{}/error.log".format(path), "w+")
+
+    def log(self, str):
+        if(self.logging):
+            self.error_log.write(str)
+
+    def flushlog(self):
+        if(self.logging):
+            self.error_log.flush()
+
+    def closelog(self):
+        if(self.logging):
+            self.error_log.close()
+
+    def __init__(self, layout, numGames, numGhosts, numTraining, layoutWidth, layoutHeight, logging):
+        self.logging = logging
+        self.error_log = None
+
         self.pacman_cwd = "{}/reinforcement/".format(path)
-        self.error_log = open("{}/error.log".format(path), "w+")
 
         argv = []
         argv.append("python2")
@@ -67,6 +85,7 @@ class Env(gym.Env):
             self.connection.close()
             self.socket.close()
             self.process.kill()
+            self.closelog()
         except Exception as e:
             print(e)
             pass
@@ -95,26 +114,26 @@ class Env(gym.Env):
         return map
 
     def reset(self):
-        self.error_log.write("Resetting environment\n")
+        self.log("Resetting environment\n")
         if self.process:
             self.process.kill()
         # if self.connection:
         #    self.connection.close()
 
         self.process = subprocess.Popen(self.argv, cwd=self.pacman_cwd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        self.error_log.write("Started subprocess\n")
+        self.log("Started subprocess\n")
 
         self.connection, self.client_addr = self.socket.accept()
-        self.error_log.write("Accepted connection\n")
+        self.log("Accepted connection\n")
 
         data = self.connection.recv(self.observation_length)
         data = data.decode("ASCII")
 
-        self.error_log.write("Got first observation: ---------------------------------\n")
-        self.error_log.write(data)
-        self.error_log.write("-------------------------------------------------------\n")
+        self.log("Got first observation: ---------------------------------\n")
+        self.log(data)
+        self.log("-------------------------------------------------------\n")
 
-        self.error_log.flush()
+        self.flushlog()
 
         return self.process_observation_string(data)
 
@@ -122,7 +141,7 @@ class Env(gym.Env):
     def step(self, action):
         self.connection.send(bytes("{}".format(action), "ASCII"))
 
-        self.error_log.write("Sending: {}\n".format(action))
+        self.log("Sending: {}\n".format(action))
         data = self.connection.recv(self.packet_length)
         data = data.decode("ASCII")
 
@@ -130,14 +149,14 @@ class Env(gym.Env):
         reward_str = data[self.done_length:self.done_length + self.reward_length]
         state_str = data[self.done_length + self.reward_length:]
 
-        self.error_log.write("Received: --------------------------------------\n")
-        self.error_log.write(data)
-        self.error_log.write("------------------------------------------------\n")
+        self.log("Received: --------------------------------------\n")
+        self.log(data)
+        self.log("------------------------------------------------\n")
 
         try:
             next_state = self.process_observation_string(state_str)
         except Exception as e:
-            self.error_log.close()
+            self.closelog()
             raise e
 
         reward = int(reward_str)
