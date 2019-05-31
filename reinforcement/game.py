@@ -514,7 +514,10 @@ class GameStateData:
             if agentState.isPacman:
                 map[x][y] = self._pacStr( agent_dir )
             else:
-                map[x][y] = self._ghostStr( agent_dir )
+                if agentState.scaredTimer > 0:
+                    map[x][y] = "F"
+                else:
+                    map[x][y] = self._ghostStr( agent_dir )
 
         for x, y in self.capsules:
             map[x][y] = 'o'
