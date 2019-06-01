@@ -231,8 +231,13 @@ class InterfaceAgent(ReinforcementAgent):
 
     def update(self, state, action, nextState, reward):
         done_str = str("1" if self.done else "0")
+
+        if reward < -1:
+            reward = -500
+
         if abs(reward) > 500:
             reward = sign(reward) * 500
+
         reward_str = str(int(reward)).zfill(4)
         state_str = str(nextState)
         self.socket.send(bytes(done_str + reward_str + state_str))
