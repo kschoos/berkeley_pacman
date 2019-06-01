@@ -40,6 +40,7 @@ class Env(gym.Env):
     def __init__(self, layout, numGames, numGhosts, numTraining, layoutWidth, layoutHeight, logging):
         self.logging = logging
         self.error_log = None
+        self.initlogging()
 
         self.pacman_cwd = "{}/reinforcement/".format(path)
 
