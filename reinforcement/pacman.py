@@ -436,7 +436,7 @@ class GhostRules:
     checkDeath = staticmethod( checkDeath )
 
     def collide( state, ghostState, agentIndex):
-        if ghostState.scaredTimer > 0:
+        if ghostState.scaredTimer > 0 and not (state.data._lose or state.data._win):
             state.data.scoreChange += 200
             GhostRules.placeGhost(state, ghostState)
             ghostState.scaredTimer = 0
