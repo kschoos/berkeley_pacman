@@ -1,0 +1,15 @@
+ TEST 6:
+DQN:
+num_steps: 4000000
+memory_size: 1000000
+window_length: 1
+exploration_fraction: 0.5
+exploration_final_eps: 0.1
+learning_rate: 2.5e-05
+gamma: 0.95
+target network update freq: 10000
+num runs: 3
+num ghosts: 2
+
+The first run went relatively well, however, 4M steps seemed to still not be enough. Will reduce the network update freq to 5k, as the learning shows strong signs of it being too high, and increase the number of steps to 15M.
+This will take roughly 21 to 24 hours.
